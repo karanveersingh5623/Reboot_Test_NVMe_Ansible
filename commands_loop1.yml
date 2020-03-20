@@ -1,0 +1,64 @@
+---
+#- name: IPMI Power Reset
+- hosts: all
+  #connection: local
+  gather_facts: True
+
+  vars:
+    datatype: SystemAll
+  vars_prompt:
+    - name: Input
+      prompt: "Do you want Cold Boot:  Input options: yes/no"
+      private: no
+
+  tasks:
+    - name: Create Lspci Output File
+      file:
+        dest: ./lspci.txt
+        state: touch
+      delegate_to: localhost
+    - name: Create Lsblk Output File
+      file:
+        dest: ./lsblk.txt
+        state: touch
+      delegate_to: localhost
+    - name: Create Smart Output File
+      file:
+        dest: ./smart.txt
+        state: touch
+      delegate_to: localhost
+    - name: Create Extended Smart Output File
+      file:
+        dest: ./extended.txt
+        state: touch
+      delegate_to: localhost
+    - name: Create a list of NVMe drives in a server
+      shell: "{{ 'cd /dev && ls -p nvme[0-9]' }}"
+      register: nvme_list
+    - debug: var=nvme_list.stdout_lines
+      #- set_fact:
+      # nvme_list: "{{ nvme_list.stdout_lines }}"  
+    - name: Copy fio configuration file to Test server
+      copy:
+        src: ./fio_por.fio
+        dest: "{{ FIO_File_RemotePath }}"
+      register: fio_copy
+    - debug: var=fio_copy
+
+    - name: Get NVMe Devices for running FIO
+      shell: "{{ 'ls -1 /dev/nvme[0-9]n[0-9]' }}"
+      register: namespace
+    - debug: var=namespace.stdout_lines
+
+    - name: Change the FIO configuration file w.r.t to NVMe Devices
+      lineinfile:
+        dest: '{{ FIO_File_RemotePath }}fio_por.fio'
+        regexp: "filename="
+        line: "filename={{ namespace.stdout_lines | join(':') }}"
+
+    - name: Reboot POR Test
+      include_tasks: commands_tasks1.yml
+      #when: result.stdout_lines == nvme_list.stdout_lines
+      loop: "{{ range(0, 2)|list}}"
+  #debug: msg="NVMe disk found, bus {{item.split(":")[0]}}, function {{item.split('.')[-1]}}"
+  #with_items: "{{ lspci_nvme.stdout_lines }}"
