@@ -1,13 +1,3 @@
-## my vms/server hosted locally ##
-#[all:vars]
-#ansible_connection=ssh
-#ansible_user=maas
-#ansible_ssh_pass=maas
-#ansible_user='iec'           # Username for ssh connection
-#ansible_become='yes'             # Run commands as root user?
-#ansible_become_pass='1' # Password for sudo user i.e. ansible_user password
-#ansible_become_method='sudo'     # How do I become root user? Use sudo.
-
 [all:vars]
 ansible_connection=ssh
 ansible_user=iec
@@ -16,32 +6,18 @@ ansible_become='yes'             # Run commands as root user?
 #ansible_become_pass='1' # Password for sudo user i.e. ansible_user password
 ansible_become_method='sudo'     # How do I become root user? Use sudo.
 
-#[testhosts]
-#node2 ansible_ssh_user=iec
-#node3 ansible_ssh_user=iec
-
 [master]
-#node2    baseuri=194.167.137.32
-#node3    baseuri=194.167.137.13
 node5   baseuri=194.167.137.33
 node5	baseuri1=194.167.137.43
-#node2	baseuri=194.167.137.32 username=root password=calvin
-#194.167.137.43			
+#node2	baseuri=194.167.137.32 username=root password=calvin		
 
 [myhosts:children]
 master
 
 [myhosts:vars]
 # Credentials for OOB controller
-#baseuri=194.167.137.33
-#baseuri1=194.167.137.43
 username=Administrator
 password=F6VZ27BL
-FIO_File_RemotePath='/home/iec/'   
+   
 # FIO destination file location on test server
-#ansible_connection=ssh
-#ansible_user=iec
-#ansible_ssh_pass=1
-#ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-# Local directory where all results are placed
-#rootdir=~/inventory_files
+FIO_File_RemotePath='/home/iec/'
